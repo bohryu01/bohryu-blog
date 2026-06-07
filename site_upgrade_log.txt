@@ -1,0 +1,112 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260606155210
+Username: BOHRPC06\Administrator
+RunAs User: BOHRPC06\Administrator
+Configuration Name: 
+Machine: BOHRPC06 (Microsoft Windows NT 10.0.22621.0)
+Host Application: C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe
+Process ID: 15572
+PSVersion: 5.1.22621.608
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.22621.608
+BuildVersion: 10.0.22621.608
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is D:\bohryu-site\bohryu-blog\site_upgrade_log.txt
+PS D:\bohryu-site\bohryu-blog> $CurrentRunTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+PS D:\bohryu-site\bohryu-blog> Write-Host "`n【$CurrentRunTime】开始Openclaw站点升级优化 | 站点根目录：$SiteRoot | 目标端口:$Port" -ForegroundColor Cyan
+
+【2026-06-06 15:52:11】开始Openclaw站点升级优化 | 站点根目录：D:\bohryu-site\bohryu-blog | 目标端口:1313
+PS D:\bohryu-site\bohryu-blog> if(-not(Test-Path $SiteRoot)){
+    Write-Error "站点目录不存在：$SiteRoot，请确认Hugo项目路径！终止升级"
+    Stop-Transcript
+    exit 1
+}
+PS D:\bohryu-site\bohryu-blog> # ======================步骤2：创建content/layouts目录，写入完整HTML源码======================
+PS D:\bohryu-site\bohryu-blog> # 创建目录
+PS D:\bohryu-site\bohryu-blog> $ContentDir = Split-Path $TargetHtmlPath_Content -Parent
+PS D:\bohryu-site\bohryu-blog> $LayoutDir = Split-Path $TargetHtmlPath_Layout -Parent
+PS D:\bohryu-site\bohryu-blog> foreach($dir in ($ContentDir,$LayoutDir)){
+    if(-not(Test-Path $dir)){New-Item $dir -ItemType Directory -Force | Out-Null;Write-Host "创建目录：$dir" -ForegroundColor Green}
+}
+创建目录：D:\bohryu-site\bohryu-blog\content
+PS D:\bohryu-site\bohryu-blog> # 双位置写入HTML（content/_index首页+layouts/index兜底）
+PS D:\bohryu-site\bohryu-blog> Set-Content -Path $TargetHtmlPath_Content -Value $FullHtmlSource -Encoding utf8
+PS D:\bohryu-site\bohryu-blog> Set-Content -Path $TargetHtmlPath_Layout -Value $FullHtmlSource -Encoding utf8
+PS D:\bohryu-site\bohryu-blog> Write-Host "✅ 完整首页HTML已全量写入：`n 1.$TargetHtmlPath_Content `n 2.$TargetHtmlPath_Layout" -ForegroundColor Green
+✅ 完整首页HTML已全量写入：
+ 1.D:\bohryu-site\bohryu-blog\content\_index.html 
+ 2.D:\bohryu-site\bohryu-blog\layouts\index.html
+PS D:\bohryu-site\bohryu-blog> # ======================步骤3：站点缓存&冗余文件清理（优化项1）======================
+PS D:\bohryu-site\bohryu-blog> $CleanDirList = @(
+    (Join-Path $SiteRoot ".hugo_cache"),
+    (Join-Path $SiteRoot "public"),
+    (Join-Path $SiteRoot "resources\_gen")
+)
+PS D:\bohryu-site\bohryu-blog> foreach($cDir in $CleanDirList){
+    if(Test-Path $cDir){
+        Remove-Item $cDir -Recurse -Force -ErrorAction SilentlyContinue
+        Write-Host "清理冗余缓存目录：$cDir" -ForegroundColor Yellow
+    }
+}
+清理冗余缓存目录：D:\bohryu-site\bohryu-blog\public
+PS D:\bohryu-site\bohryu-blog> # ======================步骤4：目录权限优化（优化项2：当前用户完全控制）======================
+PS D:\bohryu-site\bohryu-blog> icacls $SiteRoot /grant "$env:USERNAME":F /T /C | Out-Null
+PS D:\bohryu-site\bohryu-blog> Write-Host "✅ 站点目录权限优化完成：当前用户完全控制权限" -ForegroundColor Green
+✅ 站点目录权限优化完成：当前用户完全控制权限
+PS D:\bohryu-site\bohryu-blog> # ======================步骤5：Hugo配置性能优化（写入hugo.toml压缩/缓存配置）======================
+PS D:\bohryu-site\bohryu-blog> $TomlPath = Join-Path $SiteRoot "hugo.toml"
+PS D:\bohryu-site\bohryu-blog> $OptTomlContent = @'
+# 站点性能优化配置 | 自动由升级脚本写入
+[output]
+[output.html]
+minify = true
+[params]
+cacheMaxAge = 86400
+enableAssetMinify = true
+'@
+PS D:\bohryu-site\bohryu-blog> Add-Content -Path $TomlPath -Value "`n$OptTomlContent" -Encoding utf8
+PS D:\bohryu-site\bohryu-blog> Write-Host "✅ hugo.toml追加性能优化配置：HTML压缩+静态缓存" -ForegroundColor Green
+✅ hugo.toml追加性能优化配置：HTML压缩+静态缓存
+PS D:\bohryu-site\bohryu-blog> # ======================步骤6：强制释放1313端口占用进程======================
+PS D:\bohryu-site\bohryu-blog> function Stop-PortOccupiedProcess{
+    param([int]$p)
+    $portResult = netstat -ano | findstr ":$p" | Select-String '\s+(\d+)$'
+    if($portResult){
+        $killPid = $portResult.Matches.Groups[1].Value
+        taskkill /F /PID $killPid | Out-Null
+        Write-Host "🔴 终止占用$p端口进程 PID:$killPid" -ForegroundColor DarkYellow
+    }
+}
+PS D:\bohryu-site\bohryu-blog> Stop-PortOccupiedProcess -p $Port
+PS D:\bohryu-site\bohryu-blog> # ======================步骤7：后台启动Hugo Server 1313======================
+PS D:\bohryu-site\bohryu-blog> Set-Location $SiteRoot
+PS D:\bohryu-site\bohryu-blog> # 杀掉历史hugo后台job
+PS D:\bohryu-site\bohryu-blog> Get-Job | Where-Object {$_.Name -match "HugoSite_1313"} | Stop-Job -PassThru | Remove-Job -Force
+PS D:\bohryu-site\bohryu-blog> # 新开后台作业
+PS D:\bohryu-site\bohryu-blog> Start-Job -Name "HugoSite_1313" -ScriptBlock {
+    param($root,$port)
+    Set-Location $root
+    hugo server --bind=127.0.0.1 --port=$port --disableLiveReload=false
+} -ArgumentList $SiteRoot,$Port | Out-Null
+PS D:\bohryu-site\bohryu-blog> # ======================步骤8：完成升级总结======================
+PS D:\bohryu-site\bohryu-blog> Write-Host "`n======================站点升级全部完成======================" -ForegroundColor Cyan
+
+======================站点升级全部完成======================
+PS D:\bohryu-site\bohryu-blog> Write-Host "👉 访问地址：http://localhost:$Port" -ForegroundColor Green
+👉 访问地址：http://localhost:1313
+PS D:\bohryu-site\bohryu-blog> Write-Host "👉 升级日志路径：$LogFile" -ForegroundColor Green
+👉 升级日志路径：D:\bohryu-site\bohryu-blog\site_upgrade_log.txt
+PS D:\bohryu-site\bohryu-blog> Write-Host "👉 后续再次升级：重新运行本脚本即可自动覆写页面+优化" -ForegroundColor White
+👉 后续再次升级：重新运行本脚本即可自动覆写页面+优化
+PS D:\bohryu-site\bohryu-blog> Write-Host "==========================================================`n"
+==========================================================
+PS D:\bohryu-site\bohryu-blog> Stop-Transcript
+**********************
+Windows PowerShell transcript end
+End time: 20260606155215
+**********************

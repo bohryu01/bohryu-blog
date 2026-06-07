@@ -1,0 +1,18 @@
+﻿/* 全局背景设置 */
+body {
+    margin: 0;
+    padding: 0;
+    background: url('/images/background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    background-color: #f0f8ff; /* 备用背景色 */
+    min-height: 100vh;
+}
+
+/* 确保内容容器有半透明背景，保证可读性 */
+.site-content, .main-content, .container, article, section {
+    background-color: rgba(255, 255, 255, 0.85);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 10px auto;
+    max-width: 1200px;
+}

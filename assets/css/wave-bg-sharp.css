@@ -1,0 +1,24 @@
+﻿html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    /* 引入纯净飘带背景 */
+    background-image: url("/images/pure-ribbon-bg.png") !important;
+    background-size: 100% auto;
+    background-position: top center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    /* 多浏览器强制锐化，金色细线、飘带边缘清晰不发虚 */
+    image-rendering: crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: -moz-crisp-edges;
+}
+/* 所有内容容器极低透明，完整显示原有导航、按钮、卡片文字，透出底层飘带 */
+header, nav, main, .container, .card, .item-box, footer {
+    background-color: rgba(255,255,255,0.02) !important;
+}
+/* 提升文字层级，保证页面文字按钮正常可用 */
+h1,h2,h3,p,a,button,span {
+    position: relative;
+    z-index: 2;
+}

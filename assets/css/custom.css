@@ -1,0 +1,15 @@
+/* 强制全局背景，权重最高，任何主题都盖不住 */
+body {
+    background-image: url('/background.jpg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+    background-repeat: no-repeat !important;
+}
+
+/* 让内容看得见，不影响布局 */
+main, .container, .content, article, div, section {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    padding: 20px !important;
+    border-radius: 10px !important;
+}

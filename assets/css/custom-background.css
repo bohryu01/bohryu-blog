@@ -1,0 +1,23 @@
+﻿/* 全局背景设置 - 不影响内容布局 */
+html, body {
+    background-image: url('/images/background-main.jpg') !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-attachment: fixed !important;
+    background-repeat: no-repeat !important;
+    background-color: transparent !important;
+    margin: 0;
+    padding: 0;
+}
+
+/* 确保内容区域半透明，文字清晰可见 */
+main, .container, .content, article, .post, .body, .main-content {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 1rem auto;
+    max-width: 1200px;
+    position: relative;
+    z-index: 1;
+}

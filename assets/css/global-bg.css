@@ -1,0 +1,8 @@
+﻿html,body {
+    background-image:url("/img/bg.webp");
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+    min-height:100vh;
+}
+main {background:rgba(255,255,255,0.82);border-radius:6px;}

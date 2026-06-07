@@ -1,0 +1,26 @@
+﻿/* 重度锐化渲染｜飘带+丝线高清专用CSS */
+html,body {
+    margin:0;
+    padding:0;
+    width:100%;
+    min-height:100vh;
+    background-image:url("/images/ribbon-bg-hd.png") !important;
+    background-size:100% auto;
+    background-position:center top;
+    background-repeat:no-repeat;
+    background-attachment:fixed;
+    /* 多内核强制锐化，细线/飘带边缘不模糊 */
+    image-rendering:-webkit-optimize-contrast;
+    image-rendering:-moz-crisp-edges;
+    image-rendering:crisp-edges;
+    image-rendering:pixelated;
+}
+/* 页面内容容器：极低透明度，完整保留全部内容、透底看见飘带丝线 */
+header,main,.container,.content-wrap,.card,footer,.section-wrap{
+    background:rgba(255,255,255,0.02) !important;
+}
+/* 文字区块微调，可读性+背景可视兼顾 */
+p,h1,h2,h3,a,button{
+    position:relative;
+    z-index:2;
+}
