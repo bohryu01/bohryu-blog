@@ -1,4 +1,3 @@
-﻿baseURL = "https://bohryu.eu.org/"
-languageCode = "zh-cn"
-title = "Bohryu Blog"
-theme = ""
+baseURL = 'https://bohryu-blog.pages.dev/'
+languageCode = 'zh-cn'
+title = 'Bohryu Blog'
