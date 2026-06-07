@@ -1,10 +1,4 @@
-baseURL = 'https://example.org/'
-locale = 'en-us'
-title = 'My New Hugo Project'
-customCSS = ["css/custom.css"]
-
-ignoreFiles = ["layouts/background\\.jpg$"]
-
-[frontmatter]
-[frontmatter.expiry]
-exclude = ["background.jpg"]
+﻿baseURL = "https://bohryu.eu.org/"
+languageCode = "zh-cn"
+title = "Bohryu Blog"
+theme = ""
